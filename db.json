@@ -1,7 +1,7 @@
 {
     "products": [
         {
-            "id": 1,
+            "id": 10,
             "name": "Laptop HP Pavilion",
             "type": "Informatique",
             "barcode": "1234567890123",
@@ -39,7 +39,7 @@
             ]
         },
         {
-            "id": 2,
+            "id": 22,
             "name": "Clavier Mécanique Logitech",
             "type": "Accessoires",
             "barcode": "9876543210987",
@@ -76,7 +76,7 @@
             ]
         },
         {
-            "id": 3,
+            "id": 33,
             "name": "Pc Gamer Omen By HP",
             "type": "Informatique",
             "barcode": "1236543210987",
@@ -98,7 +98,7 @@
             "name": "Amine Boutaleb",
             "dob": "1988-05-02",
             "city": "Oujda",
-            "secretKey": "AH90907J",
+            "secretKey": "1",
             "warehouseId": 1999
         },
         {
@@ -116,12 +116,5 @@
         "totalStockValue": 70,
         "mostAddedProducts": [],
         "mostRemovedProducts": []
-    },
-    "users": [
-        {
-            "id": 1,
-            "username": "yassine",
-            "password": "0000"
-        }
-    ]
+    }
 }
