@@ -11,6 +11,7 @@ import LoginScreen from "./screens/LoginScreen";
 import ScanScreen from "./screens/ScanScreen";
 import ProductListScreen from "./screens/ProductListScreen";
 import StatisticsScreen from "./screens/StatisticsScreen";
+import DetailScreen from "./screens/DetailScreen";
 
 const Stack = createStackNavigator();
 
@@ -62,6 +63,17 @@ const MainNavigator = () => {
           <Stack.Screen 
             name="Statistics" 
             component={StatisticsScreen} 
+            options={{
+              headerRight: () => (
+                <TouchableOpacity onPress={handleLogout} style={{ marginRight: 15 }}>
+                  <Ionicons name="log-out-outline" size={24} color="white" />
+                </TouchableOpacity>
+              ),
+            }}
+          />
+           <Stack.Screen 
+            name="Detail" 
+            component={DetailScreen} 
             options={{
               headerRight: () => (
                 <TouchableOpacity onPress={handleLogout} style={{ marginRight: 15 }}>
