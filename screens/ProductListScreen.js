@@ -1,48 +1,70 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, Button } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  Image,
+  Button,
+  TouchableOpacity,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setProducts } from '../redux/productSlice';
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
+import { useFocusEffect, useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { FontAwesome } from '@expo/vector-icons';
 
 const ProductListScreen = () => {
   const dispatch = useDispatch();
-  const products = useSelector(state => state.products.list);
+  const products = useSelector((state) => state.products.list);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation(); // Initialize navigation
+
+  const loadProducts = async () => {
+    try {
+      const storedProducts = await AsyncStorage.getItem('products');
+      const localProducts = storedProducts ? JSON.parse(storedProducts) : [];
+
+      const response = await axios.get('http://192.168.11.119:5000/products');
+      const apiProducts = response.data;
+
+      const allProducts = [...localProducts, ...apiProducts];
+      const uniqueProducts = allProducts.reduce((acc, product) => {
+        if (!acc.some((p) => p.id === product.id)) {
+          acc.push(product);
+        }
+        return acc;
+      }, []);
+
+      dispatch(setProducts(uniqueProducts));
+      await AsyncStorage.setItem('products', JSON.stringify(uniqueProducts));
+    } catch (error) {
+      console.error('Erreur lors du chargement des produits:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        // Charger les produits stockés localement
-        const storedProducts = await AsyncStorage.getItem('products');
-        if (storedProducts) {
-          dispatch(setProducts(JSON.parse(storedProducts)));
-        }
-
-        // Charger les produits depuis l'API
-        const response = await axios.get('http://192.168.1.14:5000/products');
-        dispatch(setProducts(response.data));
-
-        // Sauvegarder les produits en local
-        await AsyncStorage.setItem('products', JSON.stringify(response.data));
-      } catch (error) {
-        console.error("Erreur lors du chargement des produits:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadProducts();
   }, [dispatch]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      loadProducts();
+    }, [])
+  );
+
   const updateProductQuantity = async (productId, change) => {
-    const updatedProducts = products.map(product => {
-      if (product._id === productId) {
-        const updatedStocks = product.stocks?.map(stock => ({
+    const updatedProducts = products.map((product) => {
+      if (product.id === productId) {
+        const updatedStocks = product.stocks?.map((stock) => ({
           ...stock,
-          quantity: stock.quantity + change
+          quantity: stock.quantity + change,
         })) || [];
 
         return { ...product, stocks: updatedStocks };
@@ -52,6 +74,16 @@ const ProductListScreen = () => {
 
     dispatch(setProducts(updatedProducts));
     await AsyncStorage.setItem('products', JSON.stringify(updatedProducts));
+  };
+
+  const deleteProduct = async (productId) => {
+    try {
+      const updatedProducts = products.filter((product) => product.id !== productId);
+      dispatch(setProducts(updatedProducts));
+      await AsyncStorage.setItem('products', JSON.stringify(updatedProducts));
+    } catch (error) {
+      console.error('Erreur lors de la suppression du produit:', error);
+    }
   };
 
   if (loading) {
@@ -89,13 +121,17 @@ const ProductListScreen = () => {
             <th>Prix (€)</th>
             <th>Quantité</th>
           </tr>
-          ${products.map(product => `
+          ${products
+            .map(
+              (product) => `
             <tr>
               <td>${product.name}</td>
               <td>${product.price}</td>
               <td>${product.stocks?.[0]?.quantity ?? 0}</td>
             </tr>
-          `).join('')}
+          `
+            )
+            .join('')}
         </table>
       </body>
       </html>
@@ -115,20 +151,37 @@ const ProductListScreen = () => {
           const quantity = item.stocks?.[0]?.quantity ?? 0;
           return (
             <View style={styles.productContainer}>
-              <Image source={{ uri: item.image }} style={styles.productImage} />
+              <TouchableOpacity
+                style={styles.deleteIcon}
+                onPress={() => deleteProduct(item.id)}
+              >
+                <FontAwesome name="times" size={24} color="red" />
+              </TouchableOpacity>
+
+              {/* Wrap the Image in a TouchableOpacity for navigation */}
+              <TouchableOpacity onPress={() => navigation.navigate('Detail', { product: item })}>
+                <Image source={{ uri: item.image }} style={styles.productImage} />
+              </TouchableOpacity>
+
               <Text style={styles.productText}>Nom : {item.name}</Text>
               <Text style={styles.productText}>Prix : {item.price}€</Text>
               <Text style={[styles.productText, { color: getStockColor(quantity) }]}>
                 Quantité : {quantity}
               </Text>
               <View style={styles.buttonContainer}>
-                <Button title="Réapprovisionner" onPress={() => updateProductQuantity(item._id, 1)} />
-                <Button title="Décharger" onPress={() => updateProductQuantity(item._id, -1)} />
+                <Button
+                  title="Réapprovisionner"
+                  onPress={() => updateProductQuantity(item.id, 1)}
+                />
+                <Button
+                  title="Décharger"
+                  onPress={() => updateProductQuantity(item.id, -1)}
+                />
               </View>
             </View>
           );
         }}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
       />
     </View>
   );
@@ -150,6 +203,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#333',
     borderRadius: 5,
+    position: 'relative',
   },
   productText: {
     fontSize: 18,
@@ -166,6 +220,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
+  },
+  deleteIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
   },
 });
 
