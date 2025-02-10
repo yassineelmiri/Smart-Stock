@@ -1,8 +1,11 @@
 import React from "react";
-import { Provider, useSelector } from "react-redux";
+import { Provider, useSelector, useDispatch } from "react-redux";
 import store from "./redux/store";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { logout } from "./redux/authSlice";
 import HomeScreen from "./screens/HomeScreen";
 import LoginScreen from "./screens/LoginScreen";
 import ScanScreen from "./screens/ScanScreen";
@@ -13,17 +16,71 @@ const Stack = createStackNavigator();
 
 const MainNavigator = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: "black" }, // Fond noir
+        headerTintColor: "white", // Texte blanc
+      }}
+    >
       {!isAuthenticated ? (
-        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen 
+          name="Login" 
+          component={LoginScreen} 
+          options={{ headerStyle: { backgroundColor: "black" }, headerTintColor: "white" }}
+        />
       ) : (
         <>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Scan" component={ScanScreen} />
-          <Stack.Screen name="Statistics" component={StatisticsScreen} />
-          <Stack.Screen name="Products" component={ProductListScreen} />
+          <Stack.Screen 
+            name="Home" 
+            component={HomeScreen} 
+            options={{
+              headerRight: () => (
+                <TouchableOpacity onPress={handleLogout} style={{ marginRight: 15 }}>
+                  <Ionicons name="log-out-outline" size={24} color="white" />
+                </TouchableOpacity>
+              ),
+            }}
+          />
+          <Stack.Screen 
+            name="Scan" 
+            component={ScanScreen} 
+            options={{
+              headerRight: () => (
+                <TouchableOpacity onPress={handleLogout} style={{ marginRight: 15 }}>
+                  <Ionicons name="log-out-outline" size={24} color="white" />
+                </TouchableOpacity>
+              ),
+            }}
+          />
+          <Stack.Screen 
+            name="Statistics" 
+            component={StatisticsScreen} 
+            options={{
+              headerRight: () => (
+                <TouchableOpacity onPress={handleLogout} style={{ marginRight: 15 }}>
+                  <Ionicons name="log-out-outline" size={24} color="white" />
+                </TouchableOpacity>
+              ),
+            }}
+          />
+          <Stack.Screen 
+            name="Products" 
+            component={ProductListScreen} 
+            options={{
+              headerRight: () => (
+                <TouchableOpacity onPress={handleLogout} style={{ marginRight: 15 }}>
+                  <Ionicons name="log-out-outline" size={24} color="white" />
+                </TouchableOpacity>
+              ),
+            }}
+          />
         </>
       )}
     </Stack.Navigator>
