@@ -29,7 +29,8 @@
     "react-native-camera": "^4.2.1",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.6.0",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "@expo/vector-icons": "^14.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
