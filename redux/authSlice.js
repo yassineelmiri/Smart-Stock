@@ -4,7 +4,7 @@ import axios from "axios";
 // ✅ Vérifie bien que json-server tourne avant de tester
 export const loginUser = createAsyncThunk("auth/loginUser", async (userData, thunkAPI) => {
     try {
-        const response = await axios.get("http://192.168.1.14:5000/warehousemans");
+        const response = await axios.get("http://192.168.11.119:5000/warehousemans");
         const warehousemans = response.data;
         console.log("Données reçues :", warehousemans);
         console.log("Utilisateur recherché :", userData);
