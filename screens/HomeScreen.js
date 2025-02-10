@@ -22,7 +22,7 @@ const HomeScreen = ({ navigation }) => {
     >
       <View style={styles.container}>
         <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>
-          Bienvenue sur l'application de gestion de stock !
+          Bienvenuxcde sur l'application de gestion de stock !
         </Animated.Text>
         
         <TouchableOpacity
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   button: {
-    backgroundColor: '#1E90FF',  // Couleur de fond du bouton
+    backgroundColor: '#1E90FF',
     paddingVertical: 12,
     paddingHorizontal: 30,
     marginBottom: 15,
@@ -78,8 +78,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '80%',
-    elevation: 3, // Ombre pour Android
-    shadowColor: '#000',  // Ombre pour iOS
+    elevation: 3, 
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
