@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const API_URL = 'http://192.168.1.14:5000/products';
+const API_URL = 'http://192.168.11.119:5000/products';
 
 const StatisticsScreen = () => {
   const [products, setProducts] = useState([]);
