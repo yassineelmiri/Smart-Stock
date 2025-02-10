@@ -4,11 +4,13 @@ import axios from "axios";
 // ✅ Vérifie bien que json-server tourne avant de tester
 export const loginUser = createAsyncThunk("auth/loginUser", async (userData, thunkAPI) => {
     try {
-        const response = await axios.get("http://192.168.8.211:5000/users");
-        const users = response.data;
+        const response = await axios.get("http://192.168.1.14:5000/warehousemans");
+        const warehousemans = response.data;
+        console.log("Données reçues :", warehousemans);
+        console.log("Utilisateur recherché :", userData);
 
         // Vérifier si l'utilisateur existe
-        const user = users.find(u => u.username === userData.username && u.password === userData.password);
+        const user = warehousemans.find(u => u.secretKey === userData.secretKey);
 
         if (user) {
             // ✅ Simuler un token de session
@@ -33,6 +35,7 @@ const authSlice = createSlice({
         logout: (state) => {
             state.user = null;
             state.isAuthenticated = false;
+            state.error = null;
         }
     },
     extraReducers: (builder) => {
@@ -45,6 +48,7 @@ const authSlice = createSlice({
                 state.user = action.payload;
                 state.isAuthenticated = true;
                 state.loading = false;
+                state.error = null;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.error = action.payload;
