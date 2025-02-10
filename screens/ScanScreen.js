@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TextInput, StyleSheet, ScrollView } from 'react-native';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'; 
+import React, { useState } from 'react';
+import { View, Text, Button, TextInput, StyleSheet, ScrollView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ScanScreen = ({ navigation }) => {
-    const [scanned, setScanned] = useState(false);
-    const [data, setData] = useState('');
+    const [barcodeData, setBarcodeData] = useState('');
     const [productName, setProductName] = useState('');
     const [productType, setProductType] = useState('');
     const [productPrice, setProductPrice] = useState('');
@@ -13,91 +11,68 @@ const ScanScreen = ({ navigation }) => {
     const [productQuantity, setProductQuantity] = useState('');
     const [productImage, setProductImage] = useState('');
     const [warehouse, setWarehouse] = useState('');
+    const [city, setCity] = useState('');
+    const [latitude, setLatitude] = useState('');
+    const [longitude, setLongitude] = useState('');
 
-    // Demande des permissions pour la caméra
-    const [cameraPermission, requestPermission] = useCameraPermissions();
-
-    // Handler pour scanner le code QR
-    const handleBarCodeScanned = async ({ type, data }) => {
-        console.log('Code QR scanné:', data); 
-        setScanned(true);
-        setData(data);
-
-        try {
-            const response = await fetch(`http://192.168.8.211:5000/products?barcode=1234567890123`);
-            const product = await response.json();
-
-            if (product.length > 0) {
-                const productData = product[0];
-                setProductName(productData.name);
-                setProductType(productData.type);
-                setProductPrice(productData.price.toString());
-                setProductSupplier(productData.supplier);
-                setProductQuantity(productData.stocks[0]?.quantity.toString());
-                setProductImage(productData.image);
-              } else {
-                alert('Produit non trouvé');
-              }
-        } catch (error) {
-            console.error('Erreur lors de la récupération du produit:', error);
+    const handleSubmit = async () => {
+        if (!productName || !productPrice || !productSupplier || !warehouse || !city || !latitude || !longitude || !productQuantity) {
+            Alert.alert('Erreur', 'Veuillez remplir tous les champs requis.');
+            return;
         }
-    };
 
-    // Envoi des données du produit
-    const handleSubmit = () => {
-        const product = {
+        const newProduct = {
+            id: Date.now(),
             name: productName,
             type: productType,
-            price: productPrice,
+            barcode: barcodeData,
+            price: parseFloat(productPrice),
             supplier: productSupplier,
-            quantity: productQuantity,
-            image: productImage,
-            warehouse,
+            image: productImage || null,
+            stocks: [
+                {
+                    id: Date.now() + 1,
+                    name: warehouse,
+                    quantity: parseInt(productQuantity),
+                    localisation: {
+                        city: city,
+                        latitude: parseFloat(latitude),
+                        longitude: parseFloat(longitude),
+                    },
+                },
+            ],
+            editedBy: [
+                {
+                    warehousemanId: 1444,
+                    at: new Date().toISOString().split('T')[0],
+                },
+            ],
         };
 
-        AsyncStorage.setItem('newProduct', JSON.stringify(product));
-        alert('Produit ajouté avec succès!');
-        navigation.goBack();
+        try {
+            const existingProducts = await AsyncStorage.getItem('products');
+            let products = existingProducts ? JSON.parse(existingProducts) : [];
+            products.push(newProduct);
+            await AsyncStorage.setItem('products', JSON.stringify(products));
+            Alert.alert('Succès', 'Produit ajouté avec succès!');
+            navigation.goBack();
+        } catch (error) {
+            Alert.alert('Erreur', 'Impossible d’enregistrer le produit.');
+            console.error('Erreur AsyncStorage:', error);
+        }
     };
 
-    useEffect(() => {
-        if (cameraPermission?.status !== 'granted') {
-            requestPermission();
-        }
-    }, [cameraPermission, requestPermission]);
-
-    if (cameraPermission === null) {
-        return <View><Text>Demande de permission en cours...</Text></View>;
-    }
-
-    if (cameraPermission.status === 'denied') {
-        return <View><Text>Permission de caméra refusée</Text></View>;
-    }
-
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.title}>Scanner un produit</Text>
+        <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
+            <Text style={styles.title}>Ajouter un produit</Text>
 
-            {/* Affichage de la caméra avec CameraView */}
-            <CameraView
-                style={styles.camera}
-                onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-                type='back'
-                barCodeScannerSettings={{
-                    barCodeTypes: ['qr', 'ean13'],
-                }}
-            />
-
-            {scanned && (
-                <View style={styles.resultContainer}>
-                    <Text style={styles.resultText}>Code Scanné : {data}</Text>
-                    <Button title="Scanner à nouveau" onPress={() => setScanned(false)} />
-                </View>
-            )}
-
-            {/* Formulaire de création de produit */}
             <View style={styles.formContainer}>
-                <Text style={styles.formTitle}>Formulaire de création de produit</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Code-barres"
+                    value={barcodeData}
+                    onChangeText={setBarcodeData}
+                />
                 <TextInput
                     style={styles.input}
                     placeholder="Nom du produit"
@@ -112,7 +87,7 @@ const ScanScreen = ({ navigation }) => {
                 />
                 <TextInput
                     style={styles.input}
-                    placeholder="Prix du produit"
+                    placeholder="Prix"
                     keyboardType="numeric"
                     value={productPrice}
                     onChangeText={setProductPrice}
@@ -125,19 +100,37 @@ const ScanScreen = ({ navigation }) => {
                 />
                 <TextInput
                     style={styles.input}
-                    placeholder="Quantité initiale"
+                    placeholder="Quantité"
                     keyboardType="numeric"
                     value={productQuantity}
                     onChangeText={setProductQuantity}
                 />
-                {parseInt(productQuantity) > 0 && (
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Entrepôt concerné"
-                        value={warehouse}
-                        onChangeText={setWarehouse}
-                    />
-                )}
+                <TextInput
+                    style={styles.input}
+                    placeholder="Entrepôt"
+                    value={warehouse}
+                    onChangeText={setWarehouse}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Ville"
+                    value={city}
+                    onChangeText={setCity}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Latitude"
+                    keyboardType="numeric"
+                    value={latitude}
+                    onChangeText={setLatitude}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Longitude"
+                    keyboardType="numeric"
+                    value={longitude}
+                    onChangeText={setLongitude}
+                />
                 <TextInput
                     style={styles.input}
                     placeholder="Image URL (facultatif)"
@@ -150,51 +143,53 @@ const ScanScreen = ({ navigation }) => {
     );
 };
 
+const COLORS = {
+    background: '#f4f4f9',
+    text: '#333',
+    inputBackground: '#fff',
+    inputBorder: '#ddd',
+    buttonBackground: '#4CAF50',
+    buttonText: '#fff',
+};
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
         padding: 10,
+        backgroundColor: COLORS.background,
     },
     title: {
-        fontSize: 20,
-        marginBottom: 20,
-        color: '#fff',
+        fontSize: 22,
+        color: COLORS.text,
+        fontWeight: 'bold',
         textAlign: 'center',
-    },
-    camera: {
-        width: '100%',
-        height: 400,
         marginBottom: 20,
-    },
-    resultContainer: {
-        marginTop: 20,
-        alignItems: 'center',
-    },
-    resultText: {
-        fontSize: 18,
-        marginBottom: 10,
-        color: '#fff',
     },
     formContainer: {
         width: '100%',
         paddingHorizontal: 20,
-        marginTop: 20,
-    },
-    formTitle: {
-        fontSize: 18,
-        marginBottom: 15,
-        color: '#fff',
     },
     input: {
-        height: 40,
-        borderColor: '#ccc',
+        height: 45,
+        borderColor: COLORS.inputBorder,
         borderWidth: 1,
-        marginBottom: 10,
-        paddingHorizontal: 10,
-        borderRadius: 5,
-        backgroundColor: '#fff',
+        marginBottom: 12,
+        paddingHorizontal: 15,
+        borderRadius: 10,
+        backgroundColor: COLORS.inputBackground,
         color: '#000',
+        fontSize: 16,
+    },
+    button: {
+        backgroundColor: COLORS.buttonBackground,
+        padding: 15,
+        borderRadius: 10,
+        marginTop: 20,
+    },
+    buttonText: {
+        color: COLORS.buttonText,
+        fontSize: 18,
+        textAlign: 'center',
     },
 });
 
