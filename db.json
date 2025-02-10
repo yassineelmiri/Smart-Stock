@@ -1,7 +1,7 @@
 {
     "products": [
         {
-            "id": 10,
+            "id": 1,
             "name": "Laptop HP Pavilion",
             "type": "Informatique",
             "barcode": "1234567890123",
@@ -39,7 +39,7 @@
             ]
         },
         {
-            "id": 22,
+            "id": 2,
             "name": "Clavier Mécanique Logitech",
             "type": "Accessoires",
             "barcode": "9876543210987",
@@ -76,7 +76,7 @@
             ]
         },
         {
-            "id": 33,
+            "id": 3,
             "name": "Pc Gamer Omen By HP",
             "type": "Informatique",
             "barcode": "1236543210987",
