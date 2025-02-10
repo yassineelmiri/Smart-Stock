@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, ScrollView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { useDispatch } from 'react-redux';
+import { setProducts } from '../redux/productSlice';
 const ScanScreen = ({ navigation }) => {
+    const dispatch = useDispatch();
     const [barcodeData, setBarcodeData] = useState('');
     const [productName, setProductName] = useState('');
     const [productType, setProductType] = useState('');
@@ -54,6 +56,8 @@ const ScanScreen = ({ navigation }) => {
             let products = existingProducts ? JSON.parse(existingProducts) : [];
             products.push(newProduct);
             await AsyncStorage.setItem('products', JSON.stringify(products));
+            dispatch(setProducts(products));
+
             Alert.alert('Succès', 'Produit ajouté avec succès!');
             navigation.goBack();
         } catch (error) {
