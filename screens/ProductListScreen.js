@@ -15,21 +15,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setProducts } from '../redux/productSlice';
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
-import { useFocusEffect, useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { FontAwesome } from '@expo/vector-icons';
 
 const ProductListScreen = () => {
   const dispatch = useDispatch();
   const products = useSelector((state) => state.products.list);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation(); // Initialize navigation
+  const navigation = useNavigation();
 
   const loadProducts = async () => {
     try {
       const storedProducts = await AsyncStorage.getItem('products');
       const localProducts = storedProducts ? JSON.parse(storedProducts) : [];
 
-      const response = await axios.get('http://192.168.11.119:5000/products');
+      const response = await axios.get('http://192.168.8.241:5000/products');
       const apiProducts = response.data;
 
       const allProducts = [...localProducts, ...apiProducts];
@@ -90,7 +90,7 @@ const ProductListScreen = () => {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#00ff00" />
-        <Text style={{ color: '#fff' }}>Chargement des produits...</Text>
+        <Text style={styles.loadingText}>Chargement des produits...</Text>
       </View>
     );
   }
@@ -106,11 +106,11 @@ const ProductListScreen = () => {
       <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; padding: 20px; color: #000; }
-          h1 { text-align: center; }
+          body { font-family: Arial, sans-serif; padding: 20px; color: #fff; background-color: #121212; }
+          h1 { text-align: center; color: #fff; }
           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-          th { background-color: #f4f4f4; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: center; color: #fff; }
+          th { background-color: #444; }
         </style>
       </head>
       <body>
@@ -158,7 +158,6 @@ const ProductListScreen = () => {
                 <FontAwesome name="times" size={24} color="red" />
               </TouchableOpacity>
 
-              {/* Wrap the Image in a TouchableOpacity for navigation */}
               <TouchableOpacity onPress={() => navigation.navigate('Detail', { product: item })}>
                 <Image source={{ uri: item.image }} style={styles.productImage} />
               </TouchableOpacity>
@@ -172,10 +171,12 @@ const ProductListScreen = () => {
                 <Button
                   title="Réapprovisionner"
                   onPress={() => updateProductQuantity(item.id, 1)}
+                  color="#8A2BE2" // Violet color for buttons
                 />
                 <Button
                   title="Décharger"
                   onPress={() => updateProductQuantity(item.id, -1)}
+                  color="#8A2BE2" // Violet color for buttons
                 />
               </View>
             </View>
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: '#000',
+    backgroundColor: '#121212',
   },
   title: {
     fontSize: 22,
@@ -226,6 +227,11 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     zIndex: 1,
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 18,
+    marginTop: 20,
   },
 });
 
