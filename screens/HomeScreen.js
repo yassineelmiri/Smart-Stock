@@ -2,14 +2,13 @@ import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Animated, TouchableOpacity } from 'react-native';
 
 const HomeScreen = ({ navigation }) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current; // Initialisation de la valeur d'opacité à 0
-
+  const fadeAnim = useRef(new Animated.Value(0)).current; 
   useEffect(() => {
     Animated.timing(
       fadeAnim,
       {
         toValue: 1,
-        duration: 2000, // Durée de l'animation en millisecondes
+        duration: 2000,
         useNativeDriver: true,
       }
     ).start();
@@ -17,12 +16,12 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <ImageBackground 
-      source={require('../assets/image.png')} 
+      source={require('../assets/bg.png')} 
       style={styles.backgroundImage}
     >
       <View style={styles.container}>
         <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>
-          Bienvenuxcde sur l'application de gestion de stock !
+          Bienvenu sur l'application de gestion de stock !
         </Animated.Text>
         
         <TouchableOpacity
@@ -61,16 +60,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.86)',
+    backgroundColor: 'rgba(0, 0, 0, 0.18)',
   },
   title: {
     fontSize: 22,
     marginBottom: 20,
     textAlign: 'center',
     color: '#fff',
+    fontWeight: 'bold'
   },
   button: {
-    backgroundColor: '#1E90FF',
+    backgroundColor: 'rgb(0, 0, 0)',
     paddingVertical: 12,
     paddingHorizontal: 30,
     marginBottom: 15,
