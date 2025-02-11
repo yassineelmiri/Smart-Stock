@@ -12,9 +12,9 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DetailScreen = ({ route, navigation }) => {
-  const { product } = route.params; // Get the product data from navigation params
-  const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
-  const [updatedProduct, setUpdatedProduct] = useState(product); // State for updated product data
+  const { product } = route.params; 
+  const [modalVisible, setModalVisible] = useState(false); 
+  const [updatedProduct, setUpdatedProduct] = useState(product); 
 
   // Function to handle updating product information
   const handleUpdateProduct = async () => {
