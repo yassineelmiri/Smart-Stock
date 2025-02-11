@@ -24,10 +24,10 @@ const LoginScreen = ({ navigation }) => {
 
     return (
         <ImageBackground
-            source={require('../assets/image.png')}
+            source={require('../assets/login.png')}
             style={{ flex: 1 }}
         >
-            <View style={{ flex: 1, justifyContent: "center", padding: 20, backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
+            <View style={{ flex: 1, justifyContent: "center", padding: 20, backgroundColor: 'rgba(0, 0, 0, 0.23)' }}>
                 <Text style={{ fontSize: 24, marginBottom: 20, color: 'white' }}>Connexion</Text>
                 <TextInput
                     placeholder="Secret Key"
@@ -51,14 +51,14 @@ const LoginScreen = ({ navigation }) => {
 
                 <TouchableOpacity 
                     style={{
-                        backgroundColor: '#8a2be2',
+                        backgroundColor: '#000',
                         paddingVertical: 12,
                         borderRadius: 8,
                         alignItems: 'center',
                     }}
                     onPress={handleLogin}
                 >
-                    <Text style={{ color: '#000', fontSize: 16 }}>Se connecter</Text>
+                    <Text style={{ color: '#fff', fontSize: 16 }}>Se connecter</Text>
                 </TouchableOpacity>
             </View>
         </ImageBackground>
