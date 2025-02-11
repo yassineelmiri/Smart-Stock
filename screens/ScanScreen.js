@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, Button, TextInput, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, TextInput, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import { setProducts } from '../redux/productSlice';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+
 const ScanScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const [barcodeData, setBarcodeData] = useState('');
@@ -16,6 +18,26 @@ const ScanScreen = ({ navigation }) => {
     const [city, setCity] = useState('');
     const [latitude, setLatitude] = useState('');
     const [longitude, setLongitude] = useState('');
+    const [hasPermission, setHasPermission] = useState(null);
+    const [isCameraVisible, setIsCameraVisible] = useState(false);
+    const [camera, setCamera] = useState(null);
+
+    const [cameraPermission, requestPermission] = useCameraPermissions();
+
+    useEffect(() => {
+        if (cameraPermission?.status === 'granted') {
+            setHasPermission(true);
+        } else {
+            setHasPermission(false);
+            requestPermission();
+        }
+    }, [cameraPermission]);
+
+    const handleBarcodeScan = (barcode) => {
+        setBarcodeData(barcode);
+        console.log("QR Code scanné:", barcode);  // Afficher la valeur du QR code dans la console
+        setIsCameraVisible(false);  // Cacher la caméra après la numérisation
+    };
 
     const handleSubmit = async () => {
         if (!productName || !productPrice || !productSupplier || !warehouse || !city || !latitude || !longitude || !productQuantity) {
@@ -69,131 +91,101 @@ const ScanScreen = ({ navigation }) => {
     return (
         <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
             <Text style={styles.title}>Ajouter un produit</Text>
-
             <View style={styles.formContainer}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Code-barres"
-                    value={barcodeData}
-                    onChangeText={setBarcodeData}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Nom du produit"
-                    value={productName}
-                    onChangeText={setProductName}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Type du produit"
-                    value={productType}
-                    onChangeText={setProductType}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Prix"
-                    keyboardType="numeric"
-                    value={productPrice}
-                    onChangeText={setProductPrice}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Fournisseur"
-                    value={productSupplier}
-                    onChangeText={setProductSupplier}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Quantité"
-                    keyboardType="numeric"
-                    value={productQuantity}
-                    onChangeText={setProductQuantity}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Entrepôt"
-                    value={warehouse}
-                    onChangeText={setWarehouse}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Ville"
-                    value={city}
-                    onChangeText={setCity}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Latitude"
-                    keyboardType="numeric"
-                    value={latitude}
-                    onChangeText={setLatitude}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Longitude"
-                    keyboardType="numeric"
-                    value={longitude}
-                    onChangeText={setLongitude}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Image URL (facultatif)"
-                    value={productImage}
-                    onChangeText={setProductImage}
-                />
-                <Button title="Ajouter produit" onPress={handleSubmit} />
+                <View style={styles.row}>
+                    <TextInput style={styles.input} placeholder="Code-barres" value={barcodeData} onChangeText={setBarcodeData} placeholderTextColor="#B0B0B0" />
+                    <TouchableOpacity onPress={() => setIsCameraVisible(true)}>
+                        <Text style={styles.scanButton}>Scanner QR</Text>
+                    </TouchableOpacity>
+                </View>
+                {isCameraVisible && hasPermission === true && (
+                    <CameraView
+                        style={styles.camera}
+                        type={CameraType}
+                        barcodeScannerSettings={{
+                            barcodeTypes: ["qr"],
+                            onBarcodeScanned: (scanResult) => handleBarcodeScan(scanResult.data),
+                        }}
+                    />
+                )}
+
+                <View style={styles.row}>
+                    <TextInput style={styles.input} placeholder="Nom du produit" value={productName} onChangeText={setProductName} placeholderTextColor="#B0B0B0" />
+                    <TextInput style={styles.input} placeholder="Type du produit" value={productType} onChangeText={setProductType} placeholderTextColor="#B0B0B0" />
+                </View>
+
+                <View style={styles.row}>
+                    <TextInput style={styles.input} placeholder="Prix" keyboardType="numeric" value={productPrice} onChangeText={setProductPrice} placeholderTextColor="#B0B0B0" />
+                    <TextInput style={styles.input} placeholder="Fournisseur" value={productSupplier} onChangeText={setProductSupplier} placeholderTextColor="#B0B0B0" />
+                </View>
+
+                <View style={styles.row}>
+                    <TextInput style={styles.input} placeholder="Quantité" keyboardType="numeric" value={productQuantity} onChangeText={setProductQuantity} placeholderTextColor="#B0B0B0" />
+                    <TextInput style={styles.input} placeholder="Entrepôt" value={warehouse} onChangeText={setWarehouse} placeholderTextColor="#B0B0B0" />
+                </View>
+
+                <View style={styles.row}>
+                    <TextInput style={styles.input} placeholder="Ville" value={city} onChangeText={setCity} placeholderTextColor="#B0B0B0" />
+                    <TextInput style={styles.input} placeholder="Latitude" keyboardType="numeric" value={latitude} onChangeText={setLatitude} placeholderTextColor="#B0B0B0" />
+                </View>
+
+                <View style={styles.row}>
+                    <TextInput style={styles.input} placeholder="Longitude" keyboardType="numeric" value={longitude} onChangeText={setLongitude} placeholderTextColor="#B0B0B0" />
+                    <TextInput style={styles.input} placeholder="Image URL (facultatif)" value={productImage} onChangeText={setProductImage} placeholderTextColor="#B0B0B0" />
+                </View>
+
+                <Button title="Ajouter produit" onPress={handleSubmit} color="#6200EE" />
             </View>
         </ScrollView>
     );
-};
-
-const COLORS = {
-    background: '#f4f4f9',
-    text: '#333',
-    inputBackground: '#fff',
-    inputBorder: '#ddd',
-    buttonBackground: '#4CAF50',
-    buttonText: '#fff',
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
-        backgroundColor: COLORS.background,
+        backgroundColor: '#121212',
     },
     title: {
         fontSize: 22,
-        color: COLORS.text,
+        color: '#fff',
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 20,
     },
     formContainer: {
+        marginTop: 50,
         width: '100%',
         paddingHorizontal: 20,
     },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 20,
+        margin:12,
+    },
     input: {
+        flex: 1,
         height: 45,
-        borderColor: COLORS.inputBorder,
+        borderColor: '#ddd',
         borderWidth: 1,
-        marginBottom: 12,
         paddingHorizontal: 15,
         borderRadius: 10,
-        backgroundColor: COLORS.inputBackground,
-        color: '#000',
+        backgroundColor: '#333',
+        color: '#fff',
         fontSize: 16,
     },
-    button: {
-        backgroundColor: COLORS.buttonBackground,
-        padding: 15,
-        borderRadius: 10,
-        marginTop: 20,
-    },
-    buttonText: {
-        color: COLORS.buttonText,
+    
+    scanButton: {
+        color: '#6200EE',
         fontSize: 18,
-        textAlign: 'center',
+        marginTop: 10,
+    },
+    camera: {
+        flex: 1,
+        width: '100%',
+        height: 300,
+        backgroundColor: '#000',
     },
 });
 
