@@ -3,7 +3,7 @@ import axios from "axios";
 
 export const loginUser = createAsyncThunk("auth/loginUser", async (userData, thunkAPI) => {
     try {
-        const response = await axios.get("http://192.168.9.40:5000/warehousemans");
+        const response = await axios.get("http://192.168.11.103:5000/warehousemans");
         const warehousemans = response.data;
         console.log("Données reçues :", warehousemans);
         console.log("Utilisateur recherché :", userData);
