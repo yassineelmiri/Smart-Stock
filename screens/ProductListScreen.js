@@ -6,7 +6,6 @@ import {
   FlatList,
   ActivityIndicator,
   Image,
-  Button,
   TouchableOpacity,
   TextInput,
 } from 'react-native';
@@ -25,12 +24,13 @@ const ProductListScreen = () => {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
+
   const loadProducts = async () => {
     try {
       const storedProducts = await AsyncStorage.getItem('products');
       const localProducts = storedProducts ? JSON.parse(storedProducts) : [];
 
-      const response = await axios.get('http://192.168.9.40:5000/products');
+      const response = await axios.get('http://192.168.11.103:5000/products');
       const apiProducts = response.data;
 
       const allProducts = [...localProducts, ...apiProducts];
@@ -94,16 +94,16 @@ const ProductListScreen = () => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#00ff00" />
+        <ActivityIndicator size="large" color="#00C8FF" />
         <Text style={styles.loadingText}>Chargement des produits...</Text>
       </View>
     );
   }
 
   const getStockColor = (quantity) => {
-    if (quantity === 0) return 'red';
-    if (quantity < 10) return 'yellow';
-    return 'green';
+    if (quantity === 0) return '#FF4444'; // Rouge
+    if (quantity < 10) return '#FFD700'; // Jaune
+    return '#00C8FF'; // Bleu
   };
 
   const generatePDF = async () => {
@@ -111,11 +111,11 @@ const ProductListScreen = () => {
       <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; padding: 20px; color: #fff; background-color: #121212; }
-          h1 { text-align: center; color: #fff; }
+          body { font-family: Arial, sans-serif; padding: 20px; color: #333; background-color: #F5F5F5; }
+          h1 { text-align: center; color: #333; }
           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: center; color: #fff; }
-          th { background-color: #444; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: center; color: #333; }
+          th { background-color: #00C8FF; color: #fff; }
         </style>
       </head>
       <body>
@@ -127,16 +127,16 @@ const ProductListScreen = () => {
             <th>Quantité</th>
           </tr>
           ${products
-        .map(
-          (product) => `
+            .map(
+              (product) => `
             <tr>
               <td>${product.name}</td>
               <td>${product.price}</td>
               <td>${product.stocks?.[0]?.quantity ?? 0}</td>
             </tr>
           `
-        )
-        .join('')}
+            )
+            .join('')}
         </table>
       </body>
       </html>
@@ -148,11 +148,11 @@ const ProductListScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Liste des Produits :</Text>
+      <Text style={styles.title}>Liste des Produits</Text>
       <TextInput
         style={styles.searchInput}
         placeholder="Rechercher un produit..."
-        placeholderTextColor="#ccc"
+        placeholderTextColor="#B0B0B0"
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
@@ -166,7 +166,7 @@ const ProductListScreen = () => {
                 style={styles.deleteIcon}
                 onPress={() => deleteProduct(item.id)}
               >
-                <FontAwesome name="times" size={24} color="red" />
+                <FontAwesome name="times" size={24} color="#FF4444" />
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => navigation.navigate('Detail', { product: item })}>
@@ -180,58 +180,75 @@ const ProductListScreen = () => {
                 Quantité : {quantity}
               </Text>
               <View style={styles.buttonContainer}>
-                <Button
-                  title="Réapprovisionner"
+                <TouchableOpacity
+                  style={[styles.actionButton, { backgroundColor: '#00C8FF' }]}
                   onPress={() => updateProductQuantity(item.id, 1)}
-                  color="#000"
-                />
-                <Button
-                  title="Décharger"
+                >
+                  <Text style={styles.actionButtonText}>Réapprovisio</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.actionButton, { backgroundColor: '#FF4444' }]}
                   onPress={() => updateProductQuantity(item.id, -1)}
-                  color="gray"
-                />
+                >
+                  <Text style={styles.actionButtonText}>Décharger</Text>
+                </TouchableOpacity>
               </View>
             </View>
           );
         }}
         keyExtractor={(item) => item.id}
       />
-      <Button title="Exporter PDF" onPress={generatePDF}  />
+      <TouchableOpacity style={styles.pdfButton} onPress={generatePDF}>
+        <Text style={styles.pdfButtonText}>Exporter PDF</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  searchInput: {
-    height: 40,
-    borderColor: '#444',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    color: '#fff',
-    backgroundColor: '#333',
-    marginBottom: 10,
-  },
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#121212',
+    padding: 20,
+    backgroundColor: '#F5F5F5',
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     marginBottom: 20,
-    color: '#fff',
+    color: '#333',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  searchInput: {
+    height: 50,
+    borderColor: '#DDD',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    color: '#333',
+    backgroundColor: '#FFF',
+    marginBottom: 20,
   },
   productContainer: {
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#333',
-    borderRadius: 5,
-    position: 'relative',
+    marginBottom: 20,
+    padding: 15,
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   productText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 5,
+  },
+  productPrice: {
     fontSize: 18,
-    color: '#fff',
+    fontWeight: 'bold',
+    color: '#00C8FF',
+    marginBottom: 10,
   },
   productImage: {
     width: '100%',
@@ -245,6 +262,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10,
   },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  actionButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   deleteIcon: {
     position: 'absolute',
     top: 10,
@@ -252,14 +281,22 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   loadingText: {
-    color: '#fff',
+    color: '#333',
     fontSize: 18,
     marginTop: 20,
+    textAlign: 'center',
   },
-  productPrice: {
-    fontWeight: 'bold',
+  pdfButton: {
+    backgroundColor: '#00C8FF',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  pdfButtonText: {
+    color: '#FFF',
     fontSize: 18,
-    color: '#FFD700',
+    fontWeight: 'bold',
   },
 });
 
