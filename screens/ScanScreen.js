@@ -35,8 +35,8 @@ const ScanScreen = ({ navigation }) => {
 
     const handleBarcodeScan = (barcode) => {
         setBarcodeData(barcode);
-        console.log("QR Code scanné:", barcode);  // Afficher la valeur du QR code dans la console
-        setIsCameraVisible(false);  // Cacher la caméra après la numérisation
+        console.log("QR Code scanné:", barcode);
+        setIsCameraVisible(false); 
     };
 
     const handleSubmit = async () => {
@@ -101,8 +101,7 @@ const ScanScreen = ({ navigation }) => {
                 {isCameraVisible && hasPermission === true && (
                     <CameraView
                         style={styles.camera}
-                        type={CameraType}
-                        barcodeScannerSettings={{
+é                        barcodeScannerSettings={{
                             barcodeTypes: ["qr"],
                             onBarcodeScanned: (scanResult) => handleBarcodeScan(scanResult.data),
                         }}
@@ -110,8 +109,8 @@ const ScanScreen = ({ navigation }) => {
                 )}
 
                 <View style={styles.row}>
-                    <TextInput style={styles.input} placeholder="Nom du produit" value={productName} onChangeText={setProductName} placeholderTextColor="#B0B0B0" />
-                    <TextInput style={styles.input} placeholder="Type du produit" value={productType} onChangeText={setProductType} placeholderTextColor="#B0B0B0" />
+                    <TextInput style={styles.input} placeholder="Nom Pro." value={productName} onChangeText={setProductName} placeholderTextColor="#B0B0B0" />
+                    <TextInput style={styles.input} placeholder="Type" value={productType} onChangeText={setProductType} placeholderTextColor="#B0B0B0" />
                 </View>
 
                 <View style={styles.row}>
@@ -131,10 +130,10 @@ const ScanScreen = ({ navigation }) => {
 
                 <View style={styles.row}>
                     <TextInput style={styles.input} placeholder="Longitude" keyboardType="numeric" value={longitude} onChangeText={setLongitude} placeholderTextColor="#B0B0B0" />
-                    <TextInput style={styles.input} placeholder="Image URL (facultatif)" value={productImage} onChangeText={setProductImage} placeholderTextColor="#B0B0B0" />
+                    <TextInput style={styles.input} placeholder="Image URL" value={productImage} onChangeText={setProductImage} placeholderTextColor="#B0B0B0" />
                 </View>
 
-                <Button title="Ajouter produit" onPress={handleSubmit} color="#6200EE" />
+                <Button title="Ajouter produit" onPress={handleSubmit} color="#000" />
             </View>
         </ScrollView>
     );
@@ -143,50 +142,71 @@ const ScanScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 10,
+        padding: 15,
         backgroundColor: '#121212',
     },
     title: {
-        fontSize: 22,
+        fontSize: 24,
         color: '#fff',
         fontWeight: 'bold',
         textAlign: 'center',
-        marginBottom: 20,
+        marginBottom: 25,
     },
     formContainer: {
-        marginTop: 50,
-        width: '100%',
-        paddingHorizontal: 20,
+        backgroundColor: '#1E1E1E',
+        padding: 20,
+        borderRadius: 12,
+        marginVertical: 20,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 8,
     },
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        gap: 20,
-        margin:12,
+        gap: 12,
+        marginBottom: 15,
     },
     input: {
         flex: 1,
-        height: 45,
-        borderColor: '#ddd',
+        height: 50,
+        borderColor: '#444',
         borderWidth: 1,
         paddingHorizontal: 15,
         borderRadius: 10,
-        backgroundColor: '#333',
+        backgroundColor: '#2A2A2A',
         color: '#fff',
         fontSize: 16,
     },
-    
     scanButton: {
-        color: '#6200EE',
+        color: '#00C8FF',
         fontSize: 18,
-        marginTop: 10,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        paddingVertical: 10,
     },
     camera: {
         flex: 1,
         width: '100%',
         height: 300,
-        backgroundColor: '#000',
+        borderRadius: 10,
+        marginTop: 10,
     },
+    button: {
+        backgroundColor: '#00C8FF',
+        paddingVertical: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 15,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+    }
 });
+
 
 export default ScanScreen;
