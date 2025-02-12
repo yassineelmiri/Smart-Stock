@@ -27,7 +27,7 @@ const LoginScreen = ({ navigation }) => {
             source={require('../assets/login.png')}
             style={{ flex: 1 }}
         >
-            <View style={{ flex: 1, justifyContent: "center", padding: 20, backgroundColor: 'rgba(0, 0, 0, 0.23)' }}>
+            <View style={{ flex: 1, justifyContent: "center", padding: 20, backgroundColor: 'rgba(0, 0, 0, 0.15)' }}>
                 <Text style={{ fontSize: 24, marginBottom: 20, color: 'white' }}>Connexion</Text>
                 <TextInput
                     placeholder="Secret Key"
