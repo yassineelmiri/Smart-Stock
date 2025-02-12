@@ -8,6 +8,7 @@ import {
   Image,
   Button,
   TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -23,13 +24,13 @@ const ProductListScreen = () => {
   const products = useSelector((state) => state.products.list);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
-
+  const [searchQuery, setSearchQuery] = useState('');
   const loadProducts = async () => {
     try {
       const storedProducts = await AsyncStorage.getItem('products');
       const localProducts = storedProducts ? JSON.parse(storedProducts) : [];
 
-      const response = await axios.get('http://192.168.8.241:5000/products');
+      const response = await axios.get('http://192.168.9.40:5000/products');
       const apiProducts = response.data;
 
       const allProducts = [...localProducts, ...apiProducts];
@@ -57,6 +58,10 @@ const ProductListScreen = () => {
     React.useCallback(() => {
       loadProducts();
     }, [])
+  );
+
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const updateProductQuantity = async (productId, change) => {
@@ -122,16 +127,16 @@ const ProductListScreen = () => {
             <th>Quantité</th>
           </tr>
           ${products
-            .map(
-              (product) => `
+        .map(
+          (product) => `
             <tr>
               <td>${product.name}</td>
               <td>${product.price}</td>
               <td>${product.stocks?.[0]?.quantity ?? 0}</td>
             </tr>
           `
-            )
-            .join('')}
+        )
+        .join('')}
         </table>
       </body>
       </html>
@@ -144,9 +149,15 @@ const ProductListScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Liste des Produits :</Text>
-      <Button title="Exporter PDF" onPress={generatePDF} />
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Rechercher un produit..."
+        placeholderTextColor="#ccc"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
       <FlatList
-        data={products}
+        data={filteredProducts}
         renderItem={({ item }) => {
           const quantity = item.stocks?.[0]?.quantity ?? 0;
           return (
@@ -163,7 +174,8 @@ const ProductListScreen = () => {
               </TouchableOpacity>
 
               <Text style={styles.productText}>Nom : {item.name}</Text>
-              <Text style={styles.productText}>Prix : {item.price}€</Text>
+              <Text style={styles.productText}>Type : {item.type}</Text>
+              <Text style={styles.productPrice}>Prix : {item.price}💰</Text>
               <Text style={[styles.productText, { color: getStockColor(quantity) }]}>
                 Quantité : {quantity}
               </Text>
@@ -171,12 +183,12 @@ const ProductListScreen = () => {
                 <Button
                   title="Réapprovisionner"
                   onPress={() => updateProductQuantity(item.id, 1)}
-                  color="#8A2BE2" // Violet color for buttons
+                  color="#000"
                 />
                 <Button
                   title="Décharger"
                   onPress={() => updateProductQuantity(item.id, -1)}
-                  color="#8A2BE2" // Violet color for buttons
+                  color="gray"
                 />
               </View>
             </View>
@@ -184,11 +196,22 @@ const ProductListScreen = () => {
         }}
         keyExtractor={(item) => item.id}
       />
+      <Button title="Exporter PDF" onPress={generatePDF}  />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  searchInput: {
+    height: 40,
+    borderColor: '#444',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    color: '#fff',
+    backgroundColor: '#333',
+    marginBottom: 10,
+  },
   container: {
     flex: 1,
     padding: 10,
@@ -232,6 +255,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     marginTop: 20,
+  },
+  productPrice: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#FFD700',
   },
 });
 
