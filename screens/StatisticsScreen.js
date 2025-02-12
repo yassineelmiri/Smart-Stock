@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://192.168.8.241:5000/products';
+const API_URL = 'http://192.168.9.40:5000/products';
 
 const StatisticsScreen = () => {
   const [products, setProducts] = useState([]);
