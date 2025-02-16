@@ -1,93 +1,83 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const HomeScreen = ({ navigation }) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current; 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    Animated.timing(
-      fadeAnim,
-      {
-        toValue: 1,
-        duration: 2000,
-        useNativeDriver: true,
-      }
-    ).start();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 2000,
+      useNativeDriver: true,
+    }).start();
   }, [fadeAnim]);
 
   return (
-    <ImageBackground 
-      source={require('../assets/bg.png')} 
-      style={styles.backgroundImage}
-    >
-      <View style={styles.container}>
-        <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>
-          Bienvenu sur l'application de gestion de stock !
-        </Animated.Text>
-        
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Scan')}
-        >
-          <Text style={styles.buttonText}>Scanner un produit</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>
+        Bienvenue sur l'application de gestion de stock !
+      </Animated.Text>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Products')}
-        >
-          <Text style={styles.buttonText}>Voir les produits</Text>
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Scan')}>
+        <FontAwesome5 name="barcode" size={24} color="#fff" style={styles.icon} />
+        <Text style={styles.buttonText}>Scanner un produit</Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Statistics')}
-        >
-          <Text style={styles.buttonText}>Statistiques</Text>
-        </TouchableOpacity>
-        
-      </View>
-    </ImageBackground>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Products')}>
+        <FontAwesome5 name="box" size={24} color="#fff" style={styles.icon} />
+        <Text style={styles.buttonText}>Voir les produits</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Statistics')}>
+        <FontAwesome5 name="chart-bar" size={24} color="#fff" style={styles.icon} />
+        <Text style={styles.buttonText}>Statistiques</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.18)',
+    backgroundColor: '#F5F5F5',
+    padding: 20,
   },
   title: {
-    fontSize: 22,
-    marginBottom: 20,
+    fontSize: 26,
+    marginBottom: 30,
     textAlign: 'center',
-    color: '#fff',
-    fontWeight: 'bold'
+    color: '#333',
+    fontWeight: 'bold',
+    fontFamily: 'Roboto',
   },
   button: {
-    backgroundColor: 'rgb(0, 0, 0)',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
+    flexDirection: 'row',
+    backgroundColor: '#00C8FF',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     marginBottom: 15,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     width: '80%',
-    elevation: 3, 
+    elevation: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+    marginLeft: 10,
+    fontFamily: 'Roboto',
+  },
+  icon: {
+    marginRight: 10,
   },
 });
 
