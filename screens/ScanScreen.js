@@ -21,27 +21,43 @@ const ScanScreen = ({ navigation }) => {
     const [hasPermission, setHasPermission] = useState(null);
     const [isCameraVisible, setIsCameraVisible] = useState(false);
     const [camera, setCamera] = useState(null);
+    const [scanned, setScanned] = useState(false);
 
     const [cameraPermission, requestPermission] = useCameraPermissions();
 
     useEffect(() => {
-        if (cameraPermission?.status === 'granted') {
-            setHasPermission(true);
-        } else {
-            setHasPermission(false);
-            requestPermission();
-        }
+        (async () => {
+            if (cameraPermission?.status === 'granted') {
+                setHasPermission(true);
+            } else if (cameraPermission?.status === 'denied') {
+                Alert.alert('Permission refusée', 'Vous devez autoriser l\'accès à la caméra pour scanner un QR code.');
+                setHasPermission(false);
+            } else {
+                const { status } = await requestPermission();
+                setHasPermission(status === 'granted');
+            }
+        })();
     }, [cameraPermission]);
 
     const handleBarcodeScan = (barcode) => {
-        setBarcodeData(barcode);
         console.log("QR Code scanné:", barcode);
-        setIsCameraVisible(false); 
+        if (!barcode) {
+            Alert.alert('Erreur', 'Aucun code-barres détecté.');
+            return;
+        }
+        console.log("QR Code scanné:", barcode);
+        setBarcodeData(barcode);
+        setIsCameraVisible(false);
     };
 
     const handleSubmit = async () => {
         if (!productName || !productPrice || !productSupplier || !warehouse || !city || !latitude || !longitude || !productQuantity) {
             Alert.alert('Erreur', 'Veuillez remplir tous les champs requis.');
+            return;
+        }
+
+        if (isNaN(parseInt(productQuantity))) {
+            Alert.alert('Erreur', 'La quantité doit être un nombre entier.');
             return;
         }
 
@@ -88,24 +104,34 @@ const ScanScreen = ({ navigation }) => {
         }
     };
 
+    const handleBarCodeScanned = ({ data }) => {
+        setScanned(true);
+        setBarcodeData(data);
+        setIsCameraVisible(false);
+        Alert.alert(`Barcode scanned! Data: ${data}`);
+    };
+
     return (
         <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
             <Text style={styles.title}>Ajouter un produit</Text>
             <View style={styles.formContainer}>
                 <View style={styles.row}>
                     <TextInput style={styles.input} placeholder="Code-barres" value={barcodeData} onChangeText={setBarcodeData} placeholderTextColor="#B0B0B0" />
-                    <TouchableOpacity onPress={() => setIsCameraVisible(true)}>
-                        <Text style={styles.scanButton}>Scanner QR</Text>
+                    <TouchableOpacity style={styles.scanButtonContainer} onPress={() => setIsCameraVisible(true)}>
+                        <Text style={styles.scanButtonText}>Scanner QR</Text>
                     </TouchableOpacity>
                 </View>
                 {isCameraVisible && hasPermission === true && (
-                    <CameraView
-                        style={styles.camera}
-é                        barcodeScannerSettings={{
-                            barcodeTypes: ["qr"],
-                            onBarcodeScanned: (scanResult) => handleBarcodeScan(scanResult.data),
-                        }}
-                    />
+                    <View>
+                        <Text style={styles.scanningText}>Scan en cours...</Text>
+                        <CameraView
+                            type={CameraType}
+                            style={styles.camera}
+                            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+                            ref={(ref) => setCamera(ref)}
+                        />
+                        <Button title="Fermer la caméra" onPress={() => setIsCameraVisible(false)} />
+                    </View>
                 )}
 
                 <View style={styles.row}>
@@ -133,7 +159,9 @@ const ScanScreen = ({ navigation }) => {
                     <TextInput style={styles.input} placeholder="Image URL" value={productImage} onChangeText={setProductImage} placeholderTextColor="#B0B0B0" />
                 </View>
 
-                <Button title="Ajouter produit" onPress={handleSubmit} color="#000" />
+                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                    <Text style={styles.submitButtonText}>Ajouter produit</Text>
+                </TouchableOpacity>
             </View>
         </ScrollView>
     );
@@ -142,24 +170,23 @@ const ScanScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 15,
-        backgroundColor: '#121212',
+        padding: 20,
+        backgroundColor: '#F5F5F5',
     },
     title: {
-        fontSize: 24,
-        color: '#fff',
+        fontSize: 28,
+        color: '#333',
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 25,
     },
     formContainer: {
-        backgroundColor: '#1E1E1E',
+        backgroundColor: '#FFF',
         padding: 20,
         borderRadius: 12,
-        marginVertical: 20,
-        shadowColor: "#000",
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
+        shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 8,
     },
@@ -172,20 +199,26 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         height: 50,
-        borderColor: '#444',
+        borderColor: '#DDD',
         borderWidth: 1,
         paddingHorizontal: 15,
-        borderRadius: 10,
-        backgroundColor: '#2A2A2A',
-        color: '#fff',
+        borderRadius: 8,
+        backgroundColor: '#FAFAFA',
+        color: '#333',
         fontSize: 16,
     },
-    scanButton: {
-        color: '#00C8FF',
-        fontSize: 18,
+    scanButtonContainer: {
+        backgroundColor: '#00C8FF',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    scanButtonText: {
+        color: '#FFF',
+        fontSize: 16,
         fontWeight: 'bold',
-        textAlign: 'center',
-        paddingVertical: 10,
     },
     camera: {
         flex: 1,
@@ -194,19 +227,24 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginTop: 10,
     },
-    button: {
+    scanningText: {
+        color: '#333',
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 10,
+    },
+    submitButton: {
         backgroundColor: '#00C8FF',
         paddingVertical: 15,
         borderRadius: 8,
         alignItems: 'center',
-        marginTop: 15,
+        marginTop: 20,
     },
-    buttonText: {
-        color: '#fff',
+    submitButtonText: {
+        color: '#FFF',
         fontSize: 18,
         fontWeight: 'bold',
-    }
+    },
 });
-
 
 export default ScanScreen;
