@@ -26,15 +26,15 @@ const MainNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: "black" }, // Fond noir
-        headerTintColor: "white", // Texte blanc
+        headerStyle: { backgroundColor: "#00C8FF" },
+        headerTintColor: "white",
       }}
     >
       {!isAuthenticated ? (
         <Stack.Screen 
           name="Login" 
           component={LoginScreen} 
-          options={{ headerStyle: { backgroundColor: "black" }, headerTintColor: "white" }}
+          options={{ headerStyle: { backgroundColor: "#00C8FF" }, headerTintColor: "white" }}
         />
       ) : (
         <>
