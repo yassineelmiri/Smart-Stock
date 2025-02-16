@@ -16,27 +16,20 @@ const DetailScreen = ({ route, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false); 
   const [updatedProduct, setUpdatedProduct] = useState(product); 
 
-  // Function to handle updating product information
   const handleUpdateProduct = async () => {
     try {
-      // Fetch existing products from AsyncStorage
       const storedProducts = await AsyncStorage.getItem('products');
       let products = storedProducts ? JSON.parse(storedProducts) : [];
 
-      // Find the index of the product to update
       const productIndex = products.findIndex((p) => p.id === updatedProduct.id);
 
       if (productIndex !== -1) {
-        // Update the product in the array
         products[productIndex] = updatedProduct;
 
-        // Save the updated products array to AsyncStorage
         await AsyncStorage.setItem('products', JSON.stringify(products));
 
-        // Close the modal
         setModalVisible(false);
 
-        // Navigate back to the product list or refresh the screen
         navigation.goBack();
       }
     } catch (error) {
